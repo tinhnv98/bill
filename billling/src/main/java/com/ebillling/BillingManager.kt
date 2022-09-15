@@ -91,26 +91,26 @@ class BillingManager(
                 .setProductType(ProductType::type.get(productType))
                 .build()
         ) { _, purchaseList ->
-            listener?.onBillingStartCheckPurchase()
-            if (purchaseList.isNotEmpty()) {
-                for (purchase in purchaseList) {
-                    val products = purchase.products
-                    if (products.isNotEmpty()) {
-                        handler.post {
-                            listener?.onBillingPurchased(
-                                products.first(),
-                                purchase
-                            )
-                        }
-                    }
-                }
-            }
             billingClient.queryProductDetailsAsync(params.build())
             { _, productDetailsList ->
                 if (productDetailsList.isNotEmpty()) {
                     productDetailsListCache = productDetailsList
                     for (product in productDetailsList) {
                         handler.post { listener?.onBillingPrice(product.productId, product) }
+                    }
+                }
+                listener?.onBillingStartCheckPurchase()
+                if (purchaseList.isNotEmpty()) {
+                    for (purchase in purchaseList) {
+                        val products = purchase.products
+                        if (products.isNotEmpty()) {
+                            handler.post {
+                                listener?.onBillingPurchased(
+                                    products.first(),
+                                    purchase
+                                )
+                            }
+                        }
                     }
                 }
             }
